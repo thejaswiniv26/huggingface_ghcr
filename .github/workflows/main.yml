@@ -9,32 +9,36 @@ on:
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      # Checkout the repository code
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
+      # Set up Docker Buildx (extended build capabilities)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Log in to GitHub container registry
+      # Log in to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1.10.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ github.token }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Lowercase the repo name and username
-        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      # Lowercase the repo name for consistent tagging
+      - name: Set lowercase repo name
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
-      - name: Build and push container image to registry
+      # Build and push the Docker image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
           push: true
